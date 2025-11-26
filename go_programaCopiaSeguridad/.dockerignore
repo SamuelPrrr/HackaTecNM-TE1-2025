@@ -1,0 +1,34 @@
+# Binario compilado localmente
+go_programaCopiaSeguridad
+
+# Directorios de backups
+backups/
+copy/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporales de macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Logs
+*.log
+
+# Documentación
+README.md
+*.md
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore

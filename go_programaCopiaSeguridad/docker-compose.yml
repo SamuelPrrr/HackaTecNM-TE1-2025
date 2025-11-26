@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  usb-backup-client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: usb-backup-client
+    
+    # Modo privilegiado para acceso a dispositivos USB
+    privileged: true
+    
+    # Variables de entorno
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - XDG_RUNTIME_DIR=/tmp/runtime-root
+    
+    # Compartir el socket X11 para mostrar la GUI
+    volumes:
+      # X11 socket para GUI (Linux)
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      
+      # Directorio de backups persistente
+      - ./backups:/backups
+      
+      # Acceso a dispositivos USB (Linux)
+      - /dev:/dev:rw
+      
+      # Para macOS, montar el directorio /Volumes
+      # - /Volumes:/Volumes:rw
+    
+    # Mapear dispositivos USB
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    
+    # Red host para mejor compatibilidad con X11
+    network_mode: host
+    
+    # Política de reinicio
+    restart: unless-stopped
+    
+    # Comandos de salud (opcional)
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "go_programaCopiaSeguridad"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+# Volúmenes nombrados opcionales
+volumes:
+  backup-data:
+    driver: local
