@@ -23,6 +23,25 @@ func IsAllowedFile(path string) bool {
 	return isAllowed(ext)
 }
 
+// CountAllowedFiles cuenta cuántos archivos permitidos hay.
+func CountAllowedFiles(root string) int64 {
+	var count int64 = 0
+
+	filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() {
+			return nil
+		}
+
+		ext := strings.ToLower(filepath.Ext(info.Name()))
+		if isAllowed(ext) {
+			count++
+		}
+		return nil
+	})
+
+	return count
+}
+
 // CopyFile copia un archivo de origen a destino
 func CopyFile(src, dst string) error {
 	source, err := os.Open(src)
@@ -142,4 +161,6 @@ func fastCopy(srcFile, destFile string, progress chan CopyProgress) {
 		FileName: filepath.Base(srcFile),
 		Done:     true,
 	}
+
+	
 }

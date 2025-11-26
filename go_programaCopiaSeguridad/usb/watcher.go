@@ -1,9 +1,15 @@
 package usb
 
-// Evento USB detectado
+// Tipo de evento de USB
 type USBEvent struct {
     Path string
+    Type USBEventType
 }
 
-// Esta función será implementada en cada SO
-//func WatchUSB(events chan USBEvent)
+// Valores del tipo de evento
+type USBEventType int
+
+const (
+    EventAdd USBEventType = iota
+    EventRemove
+)
