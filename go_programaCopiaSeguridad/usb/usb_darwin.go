@@ -3,38 +3,28 @@
 package usb
 
 import (
-	"log"
+	"os"
 	"time"
-
-	"github.com/fsnotify/fsnotify"
 )
 
 func WatchUSB(events chan USBEvent) {
-    watcher, err := fsnotify.NewWatcher()
-    if err != nil {
-        log.Println("Error watcher:", err)
-        return
-    }
-    defer watcher.Close()
-
-    err = watcher.Add("/Volumes")
-    if err != nil {
-        log.Println("Error watching /Volumes:", err)
-        return
-    }
-
-    log.Println("Esperando USB en macOS...")
+    known := make(map[string]bool)
 
     for {
-        select {
-        case ev := <-watcher.Events:
-            if ev.Op&fsnotify.Create == fsnotify.Create {
-                // Se montó algo
-                time.Sleep(500 * time.Millisecond) // esperar montado completo
-                events <- USBEvent{Path: ev.Name}
+        entries, _ := os.ReadDir("/Volumes")
+        for _, e := range entries {
+            path := "/Volumes/" + e.Name()
+
+            // ignorar disco del sistema
+            if path == "/Volumes/Macintosh HD" {
+                continue
             }
-        case err := <-watcher.Errors:
-            log.Println("Error:", err)
+
+            if !known[path] {
+                known[path] = true
+                events <- USBEvent{Path: path}
+            }
         }
+        time.Sleep(2 * time.Second)
     }
 }

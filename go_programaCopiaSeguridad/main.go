@@ -1,31 +1,47 @@
 package main
 
-//import "fmt" //paquete inicial para formatear textos y salida estándar de archivos
-
 import (
 	"fmt"
 	"go_programaCopiaSeguridad/usb"
-	"log"
 
-	"fyne.io/fyne/v2/app" //Implementaciones para interfaces
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
 )
 
-func main(){
-	myApp := app.New()
-	w := myApp.NewWindow("H")
+func main() {
+	a := app.New()
+	w := a.NewWindow("Control USB - Cliente")
+	w.Resize(fyne.NewSize(500, 300))
 
-	w.SetContent(widget.NewLabel("¡Fyne esta funcionando"))
+	// Binding para el texto
+	statusBind := binding.NewString()
+	statusBind.Set("Esperando dispositivo USB...")
 
-	w.ShowAndRun()
+	// Widget que usa binding
+	statusLabel := widget.NewLabelWithData(statusBind)
+
+	content := container.NewVBox(
+		widget.NewLabel("Monitor de USB activo"),
+		statusLabel,
+	)
+
+	w.SetContent(content)
+	w.Show()
 
 	events := make(chan usb.USBEvent)
 
-    go usb.WatchUSB(events)
+	// Llamar WatchUSB del paquete usb
+	go usb.WatchUSB(events)
 
-    log.Println("Esperando conexión USB...")
+	// Goroutine que actualiza el binding
+	go func() {
+		for ev := range events {
+			statusBind.Set(fmt.Sprintf("USB detectada en: %s", ev.Path))
+		}
+	}()
 
-    for ev := range events {
-        fmt.Println("USB detectada en ruta:", ev.Path)
-    }
+	a.Run()
 }

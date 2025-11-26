@@ -3,37 +3,32 @@
 package usb
 
 import (
-	"fmt"
-	"log"
-	"os"
+	"bufio"
+	"os/exec"
+	"strings"
 	"time"
 )
-
-func driveExists(path string) bool {
-    _, err := os.Stat(path)
-    return err == nil
-}
 
 func WatchUSB(events chan USBEvent) {
     known := make(map[string]bool)
 
     for {
-        for letter := 'D'; letter <= 'Z'; letter++ {
-            path := fmt.Sprintf("%c:\\", letter)
+        // obtener todas las unidades visibles
+        cmd := exec.Command("wmic", "logicaldisk", "get", "name")
+        out, _ := cmd.Output()
+        scanner := bufio.NewScanner(strings.NewReader(string(out)))
 
-            exists := driveExists(path)
+        for scanner.Scan() {
+            line := strings.TrimSpace(scanner.Text())
+            if strings.HasSuffix(line, ":") {
+                path := line + "\\"
 
-            if exists && !known[path] {
-                known[path] = true
-                log.Println("USB detectada:", path)
-                events <- USBEvent{Path: path}
-            }
-
-            if !exists && known[path] {
-                delete(known, path)
+                if !known[path] {
+                    known[path] = true
+                    events <- USBEvent{Path: path}
+                }
             }
         }
-
-        time.Sleep(1 * time.Second)
+        time.Sleep(2 * time.Second)
     }
 }

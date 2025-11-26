@@ -3,44 +3,23 @@
 package usb
 
 import (
-	"log"
 	"os"
-	"os/user"
 	"time"
-
-	"github.com/fsnotify/fsnotify"
 )
 
 func WatchUSB(events chan USBEvent) {
-    watcher, err := fsnotify.NewWatcher()
-    if err != nil {
-        log.Println("Error watcher:", err)
-        return
-    }
-    defer watcher.Close()
-
-    usr, _ := user.Current()
-    dirs := []string{
-        "/media/" + usr.Username,
-        "/run/media/" + usr.Username,
-    }
-
-    for _, d := range dirs {
-        if _, err := os.Stat(d); err == nil {
-            watcher.Add(d)
-            log.Println("Vigilando:", d)
-        }
-    }
+    known := make(map[string]bool)
 
     for {
-        select {
-        case ev := <-watcher.Events:
-            if ev.Op&fsnotify.Create == fsnotify.Create {
-                time.Sleep(500 * time.Millisecond)
-                events <- USBEvent{Path: ev.Name}
+        entries, _ := os.ReadDir("/media")
+        for _, e := range entries {
+            path := "/media/" + e.Name()
+
+            if !known[path] {
+                known[path] = true
+                events <- USBEvent{Path: path}
             }
-        case err := <-watcher.Errors:
-            log.Println("Error:", err)
         }
+        time.Sleep(2 * time.Second)
     }
 }
