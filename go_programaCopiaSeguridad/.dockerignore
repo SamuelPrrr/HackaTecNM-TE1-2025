@@ -3,7 +3,6 @@ go_programaCopiaSeguridad
 
 # Directorios de backups
 backups/
-copy/
 
 # Git
 .git/

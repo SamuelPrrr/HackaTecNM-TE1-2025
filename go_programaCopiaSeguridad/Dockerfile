@@ -11,7 +11,6 @@ RUN apk add --no-cache \
     libxrandr-dev \
     libxinerama-dev \
     libxi-dev \
-    libglvnd-dev \
     mesa-dev \
     libxxf86vm-dev
 
@@ -37,7 +36,7 @@ RUN apk add --no-cache \
     libxrandr \
     libxinerama \
     libxi \
-    libglvnd \
+    mesa-gles \
     mesa-gl \
     mesa-dri-gallium \
     ca-certificates
