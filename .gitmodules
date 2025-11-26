@@ -1,0 +1,3 @@
+[submodule "wildlife-watcher"]
+	path = wildlife-watcher
+	url = git@github.com:SamuelPrrr/wildlife-watcher.git
