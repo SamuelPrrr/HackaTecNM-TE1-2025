@@ -1,27 +1,144 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { Database, Cloud, Calendar, Filter, Search, Upload } from 'lucide-react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
+import { Database, Cloud, Calendar, Filter, Search, Upload, Plus, X } from 'lucide-react-native';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/Card';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { Input } from '../components/Input';
 import { colors, spacing } from '../theme/colors';
+import localStorageService, { WildlifeRecord } from '../../services/localStorageService';
+import syncService from '../../services/syncService';
+import config from '../../services/config';
 
 const Data = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [lastSync, setLastSync] = useState<Date | null>(null);
+  const [records, setRecords] = useState<WildlifeRecord[]>([]);
+  const [stats, setStats] = useState({ total: 0, unsynced: 0 });
+  const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
-  const handleSync = () => {
-    setLastSync(new Date());
+  // Form state
+  const [formData, setFormData] = useState({
+    cantidad_especies: '',
+    tipo_especies: '',
+    fecha: new Date().toISOString().split('T')[0],
+    hora: new Date().toTimeString().split(' ')[0].slice(0, 5),
+    lat: '',
+    long: '',
+  });
+
+  // Load records on mount
+  useEffect(() => {
+    loadRecords();
+    // Sync service config from environment variables
+    syncService.setConfig({
+      baseURL: config.api.baseURL,
+      endpoint: config.api.endpoint,
+      timeout: config.api.timeout,
+    });
+  }, []);
+
+  const loadRecords = async () => {
+    setLoading(true);
+    try {
+      const data = await localStorageService.getAllRecords();
+      const stats = await localStorageService.getStorageStats();
+      setRecords(data);
+      setStats(stats);
+    } catch (error) {
+      console.error('Error loading records:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const records = [
-    { id: 1, species: 'Red Fox', date: '2024-01-20', type: 'Camera', location: 'Zone A' },
-    { id: 2, species: 'Barn Owl', date: '2024-01-20', type: 'Audio', location: 'Zone B' },
-    { id: 3, species: 'European Badger', date: '2024-01-19', type: 'Camera', location: 'Zone A' },
-    { id: 4, species: 'Roe Deer', date: '2024-01-19', type: 'Camera', location: 'Zone C' },
-    { id: 5, species: 'Red Fox', date: '2024-01-18', type: 'Motion', location: 'Zone A' },
-  ];
+  const handleAddRecord = async () => {
+    if (!formData.cantidad_especies || !formData.tipo_especies || !formData.fecha || !formData.hora) {
+      Alert.alert('Validation Error', 'Please fill in all required fields');
+      return;
+    }
+
+    try {
+      const newRecord: WildlifeRecord = {
+        cantidad_especies: parseInt(formData.cantidad_especies),
+        tipo_especies: formData.tipo_especies,
+        fecha: formData.fecha,
+        hora: formData.hora,
+        lat: formData.lat ? parseFloat(formData.lat) : undefined,
+        long: formData.long ? parseFloat(formData.long) : undefined,
+      };
+
+      await localStorageService.saveRecord(newRecord);
+      Alert.alert('Success', 'Record saved locally');
+      setFormData({
+        cantidad_especies: '',
+        tipo_especies: '',
+        fecha: new Date().toISOString().split('T')[0],
+        hora: new Date().toTimeString().split(' ')[0].slice(0, 5),
+        lat: '',
+        long: '',
+      });
+      setShowForm(false);
+      loadRecords();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to save record');
+      console.error('Error saving record:', error);
+    }
+  };
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const unsyncedRecords = await localStorageService.getUnsyncedRecords();
+      if (unsyncedRecords.length === 0) {
+        Alert.alert('Info', 'No records to sync');
+        setSyncing(false);
+        return;
+      }
+
+      const result = await syncService.uploadRecords(unsyncedRecords);
+      if (result.success && result.uploadedIds.length > 0) {
+        await localStorageService.markRecordsSynced(result.uploadedIds);
+        Alert.alert('Success', `Synced ${result.uploadedIds.length} records`);
+        setLastSync(new Date());
+        loadRecords();
+      } else {
+        Alert.alert('Error', result.errors?.[0] || 'Failed to sync records');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Sync failed');
+      console.error('Sync error:', error);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const handleDeleteRecord = async (recordId: string | undefined) => {
+    if (!recordId) return;
+    try {
+      await localStorageService.deleteRecord(recordId);
+      loadRecords();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to delete record');
+    }
+  };
+
+  const filteredRecords = records.filter(
+    (r) =>
+      r.tipo_especies.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.fecha.includes(searchQuery)
+  );
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
@@ -39,27 +156,145 @@ const Data = () => {
             <CardTitle style={styles.syncTitle}>Cloud Synchronization</CardTitle>
           </View>
           <CardDescription>
-            {lastSync
-              ? `Last synced: ${lastSync.toLocaleString()}`
-              : 'No recent synchronization'}
+            {lastSync ? `Last synced: ${lastSync.toLocaleString()}` : 'No recent synchronization'}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <View style={styles.pendingContainer}>
             <View style={styles.pendingInfo}>
               <Text style={styles.pendingLabel}>Pending Records</Text>
-              <Text style={styles.pendingValue}>247</Text>
+              <Text style={styles.pendingValue}>{stats.unsynced}</Text>
             </View>
-            <Upload size={32} color={colors.mutedForeground} />
+            {syncing ? (
+              <ActivityIndicator size="small" color={colors.primary} />
+            ) : (
+              <Upload size={32} color={colors.mutedForeground} />
+            )}
           </View>
-          <Button onPress={handleSync} style={styles.syncButton}>
+          <Button onPress={handleSync} style={styles.syncButton} disabled={syncing}>
             <View style={styles.buttonContent}>
               <Cloud size={16} color={colors.primaryForeground} />
-              <Text style={styles.buttonText}>Sync to Warehouse</Text>
+              <Text style={styles.buttonText}>{syncing ? 'Syncing...' : 'Sync to Warehouse'}</Text>
             </View>
           </Button>
         </CardContent>
       </Card>
+
+      {/* Add Record Button */}
+      <View style={styles.addButtonContainer}>
+        <Button onPress={() => setShowForm(true)} style={styles.addButton}>
+          <View style={styles.buttonContent}>
+            <Plus size={16} color={colors.primaryForeground} />
+            <Text style={styles.buttonText}>Add New Record</Text>
+          </View>
+        </Button>
+      </View>
+
+      {/* Add Record Form Modal */}
+      <Modal visible={showForm} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>New Wildlife Record</Text>
+              <TouchableOpacity onPress={() => setShowForm(false)}>
+                <X size={24} color={colors.foreground} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.formScroll}>
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Species Type *</Text>
+                <Input
+                  placeholder="e.g., Red Fox"
+                  value={formData.tipo_especies}
+                  onChangeText={(text) => setFormData({ ...formData, tipo_especies: text })}
+                  style={styles.formInput}
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Quantity *</Text>
+                <Input
+                  placeholder="0"
+                  value={formData.cantidad_especies}
+                  onChangeText={(text) => setFormData({ ...formData, cantidad_especies: text })}
+                  keyboardType="numeric"
+                  style={styles.formInput}
+                />
+              </View>
+
+              <View style={styles.formRow}>
+                <View style={styles.formGroupHalf}>
+                  <Text style={styles.formLabel}>Date *</Text>
+                  <Input
+                    placeholder="YYYY-MM-DD"
+                    value={formData.fecha}
+                    onChangeText={(text) => setFormData({ ...formData, fecha: text })}
+                    style={styles.formInput}
+                  />
+                </View>
+                <View style={styles.formGroupHalf}>
+                  <Text style={styles.formLabel}>Time *</Text>
+                  <Input
+                    placeholder="HH:mm"
+                    value={formData.hora}
+                    onChangeText={(text) => setFormData({ ...formData, hora: text })}
+                    style={styles.formInput}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.formRow}>
+                <View style={styles.formGroupHalf}>
+                  <Text style={styles.formLabel}>Latitude</Text>
+                  <Input
+                    placeholder="0.0000000"
+                    value={formData.lat}
+                    onChangeText={(text) => setFormData({ ...formData, lat: text })}
+                    keyboardType="decimal-pad"
+                    style={styles.formInput}
+                  />
+                </View>
+                <View style={styles.formGroupHalf}>
+                  <Text style={styles.formLabel}>Longitude</Text>
+                  <Input
+                    placeholder="0.0000000"
+                    value={formData.long}
+                    onChangeText={(text) => setFormData({ ...formData, long: text })}
+                    keyboardType="decimal-pad"
+                    style={styles.formInput}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.formActions}>
+                <Button
+                  onPress={() => setShowForm(false)}
+                  style={
+                    {
+                      ...styles.formButton,
+                      ...styles.formButtonCancel,
+                    } as any
+                  }
+                >
+                  <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
+                </Button>
+                <Button
+                  onPress={handleAddRecord}
+                  style={
+                    {
+                      ...styles.formButton,
+                      ...styles.formButtonSubmit,
+                    } as any
+                  }
+                >
+                  <Text style={styles.buttonText}>Save Record</Text>
+                </Button>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
 
       {/* Filters and Search */}
       <Card style={styles.card}>
@@ -69,11 +304,7 @@ const Data = () => {
         <CardContent>
           <View style={styles.searchRow}>
             <View style={styles.searchContainer}>
-              <Search
-                size={16}
-                color={colors.mutedForeground}
-                style={styles.searchIcon}
-              />
+              <Search size={16} color={colors.mutedForeground} style={styles.searchIcon} />
               <Input
                 placeholder="Search records..."
                 value={searchQuery}
@@ -86,24 +317,46 @@ const Data = () => {
             </TouchableOpacity>
           </View>
 
-          <View style={styles.recordsList}>
-            {records.map((record) => (
-              <Card key={record.id} style={styles.recordCard}>
-                <CardContent style={styles.recordContent}>
-                  <View style={styles.recordInfo}>
-                    <Text style={styles.recordSpecies}>{record.species}</Text>
-                    <View style={styles.recordMeta}>
-                      <Calendar size={12} color={colors.mutedForeground} />
-                      <Text style={styles.recordMetaText}>{record.date}</Text>
-                      <Text style={styles.recordMetaText}>•</Text>
-                      <Text style={styles.recordMetaText}>{record.location}</Text>
+          {loading ? (
+            <ActivityIndicator size="small" color={colors.primary} style={styles.loadingSpinner} />
+          ) : filteredRecords.length > 0 ? (
+            <View style={styles.recordsList}>
+              {filteredRecords.map((record) => (
+                <Card key={record.id} style={styles.recordCard}>
+                  <CardContent style={styles.recordContent}>
+                    <View style={styles.recordInfo}>
+                      <Text style={styles.recordSpecies}>{record.tipo_especies}</Text>
+                      <View style={styles.recordMeta}>
+                        <Calendar size={12} color={colors.mutedForeground} />
+                        <Text style={styles.recordMetaText}>{record.fecha}</Text>
+                        <Text style={styles.recordMetaText}>•</Text>
+                        <Text style={styles.recordMetaText}>{record.hora}</Text>
+                      </View>
+                      <Text style={styles.recordQuantity}>Qty: {record.cantidad_especies}</Text>
+                      {record.lat && record.long && (
+                        <Text style={styles.recordLocation}>
+                          📍 {record.lat.toFixed(4)}, {record.long.toFixed(4)}
+                        </Text>
+                      )}
                     </View>
-                  </View>
-                  <Badge variant="outline">{record.type}</Badge>
-                </CardContent>
-              </Card>
-            ))}
-          </View>
+                    <View style={styles.recordActions}>
+                      <Badge variant={record.synced ? 'default' : 'outline'}>
+                        {record.synced ? 'Synced' : 'Pending'}
+                      </Badge>
+                      <TouchableOpacity
+                        onPress={() => handleDeleteRecord(record.id)}
+                        style={styles.deleteButton}
+                      >
+                        <X size={16} color={colors.foreground} />
+                      </TouchableOpacity>
+                    </View>
+                  </CardContent>
+                </Card>
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.noRecords}>No records found</Text>
+          )}
         </CardContent>
       </Card>
 
@@ -112,21 +365,23 @@ const Data = () => {
         <CardHeader>
           <View style={styles.storageTitleRow}>
             <Database size={20} color={colors.foreground} />
-            <CardTitle style={styles.storageTitle}>Storage Usage</CardTitle>
+            <CardTitle style={styles.storageTitle}>Storage Info</CardTitle>
           </View>
         </CardHeader>
         <CardContent>
           <View style={styles.storageInfo}>
             <View style={styles.storageRow}>
-              <Text style={styles.storageLabel}>Local Storage</Text>
-              <Text style={styles.storageValue}>2.4 GB / 5 GB</Text>
+              <Text style={styles.storageLabel}>Total Records</Text>
+              <Text style={styles.storageValue}>{stats.total}</Text>
             </View>
-            <View style={styles.progressBar}>
-              <View style={styles.progressFill} />
+            <View style={styles.storageRow}>
+              <Text style={styles.storageLabel}>Pending Sync</Text>
+              <Text style={styles.storageValue}>{stats.unsynced}</Text>
             </View>
-            <Text style={styles.storageNote}>
-              Sync data to free up local storage space
-            </Text>
+            <View style={styles.storageRow}>
+              <Text style={styles.storageLabel}>Synced</Text>
+              <Text style={styles.storageValue}>{stats.total - stats.unsynced}</Text>
+            </View>
           </View>
         </CardContent>
       </Card>
@@ -194,6 +449,12 @@ const styles = StyleSheet.create({
   syncButton: {
     marginTop: spacing.md,
   },
+  addButtonContainer: {
+    marginBottom: spacing.md,
+  },
+  addButton: {
+    backgroundColor: colors.primary,
+  },
   buttonContent: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -238,6 +499,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.background,
   },
+  loadingSpinner: {
+    marginVertical: spacing.md,
+  },
   recordsList: {
     gap: spacing.sm,
   },
@@ -247,8 +511,9 @@ const styles = StyleSheet.create({
   recordContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingTop: spacing.md,
+    gap: spacing.sm,
   },
   recordInfo: {
     flex: 1,
@@ -267,6 +532,28 @@ const styles = StyleSheet.create({
   recordMetaText: {
     fontSize: 12,
     color: colors.mutedForeground,
+  },
+  recordQuantity: {
+    fontSize: 12,
+    color: colors.foreground,
+    fontWeight: '500',
+  },
+  recordLocation: {
+    fontSize: 11,
+    color: colors.primary,
+  },
+  recordActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    alignItems: 'center',
+  },
+  deleteButton: {
+    padding: spacing.xs,
+  },
+  noRecords: {
+    textAlign: 'center',
+    color: colors.mutedForeground,
+    paddingVertical: spacing.lg,
   },
   storageCard: {
     backgroundColor: colors.muted + '80',
@@ -295,21 +582,77 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.foreground,
   },
-  progressBar: {
-    height: 8,
-    backgroundColor: colors.border,
-    borderRadius: 4,
-    overflow: 'hidden',
+  // Modal and Form styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
   },
-  progressFill: {
-    height: '100%',
-    width: '48%',
+  modalContent: {
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '90%',
+    paddingBottom: spacing.lg,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.foreground,
+  },
+  formScroll: {
+    padding: spacing.lg,
+  },
+  formGroup: {
+    marginBottom: spacing.md,
+  },
+  formRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginBottom: spacing.md,
+  },
+  formGroupHalf: {
+    flex: 1,
+  },
+  formLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.foreground,
+    marginBottom: spacing.xs,
+  },
+  formInput: {
+    borderWidth: 1,
+    borderColor: colors.input,
+    borderRadius: 8,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    fontSize: 14,
+    color: colors.foreground,
+  },
+  formActions: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginTop: spacing.lg,
+  },
+  formButton: {
+    flex: 1,
+  },
+  formButtonCancel: {
+    backgroundColor: colors.muted,
+  },
+  formButtonSubmit: {
     backgroundColor: colors.primary,
-    borderRadius: 4,
   },
-  storageNote: {
-    fontSize: 12,
-    color: colors.mutedForeground,
+  cancelButtonText: {
+    color: colors.foreground,
   },
 });
 

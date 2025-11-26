@@ -30,8 +30,11 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
+# local env files - NEVER COMMIT CREDENTIALS
+.env
+.env.local
+.env.*.local
+.env.production.local
 
 # typescript
 *.tsbuildinfo
