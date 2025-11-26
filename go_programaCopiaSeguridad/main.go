@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"go_programaCopiaSeguridad/copy"
+	"go_programaCopiaSeguridad/rules"
 	"go_programaCopiaSeguridad/usb"
+	"log"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -35,6 +38,31 @@ func main() {
 
 	// Llamar WatchUSB del paquete usb
 	go usb.WatchUSB(events)
+
+go func() {
+    r, err := rules.FetchRules()
+
+    if err != nil {
+        log.Printf("[MAIN] ERROR: %v", err)
+        statusBind.Set("No se pudieron obtener reglas del servidor")
+        return
+    }
+
+    // Aplicar extensiones al motor de copia
+    var extCorrect []string
+for _, e := range r.Extensions {
+        if e[0] != '.' {
+            extCorrect = append(extCorrect, "."+e)
+        } else {
+            extCorrect = append(extCorrect, e)
+        }
+    }
+    copy.SetExtensions(extCorrect)
+    log.Printf("[MAIN] Extensiones configuradas: %v", extCorrect)
+
+    statusBind.Set("Reglas sincronizadas con servidor")
+}()
+
 
 	// Goroutine que actualiza el binding
 	go func() {
