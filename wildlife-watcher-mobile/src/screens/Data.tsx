@@ -42,10 +42,16 @@ const Data = () => {
   useEffect(() => {
     loadRecords();
     // Sync service config from environment variables
+    // Endpoint: http://3.16.128.82:8000/dw/
     syncService.setConfig({
       baseURL: config.api.baseURL,
       endpoint: config.api.endpoint,
       timeout: config.api.timeout,
+    });
+    console.log('📡 Sync configured:', {
+      baseURL: config.api.baseURL,
+      endpoint: config.api.endpoint,
+      fullURL: `${config.api.baseURL}${config.api.endpoint}`,
     });
   }, []);
 
@@ -69,9 +75,32 @@ const Data = () => {
       return;
     }
 
+    // Validate numeric fields: cantidad_especies, lat, long
+    const cantidad = Number(formData.cantidad_especies);
+    if (!Number.isFinite(cantidad) || cantidad <= 0) {
+      Alert.alert('Validation Error', 'Cantidad de especies debe ser un número entero mayor que 0');
+      return;
+    }
+
+    if (formData.lat) {
+      const latNum = parseFloat(formData.lat);
+      if (!Number.isFinite(latNum) || latNum < -90 || latNum > 90) {
+        Alert.alert('Validation Error', 'Latitude must be a number between -90 and 90');
+        return;
+      }
+    }
+
+    if (formData.long) {
+      const longNum = parseFloat(formData.long);
+      if (!Number.isFinite(longNum) || longNum < -180 || longNum > 180) {
+        Alert.alert('Validation Error', 'Longitude must be a number between -180 and 180');
+        return;
+      }
+    }
+
     try {
       const newRecord: WildlifeRecord = {
-        cantidad_especies: parseInt(formData.cantidad_especies),
+        cantidad_especies: Math.floor(Number(formData.cantidad_especies)),
         tipo_especies: formData.tipo_especies,
         fecha: formData.fecha,
         hora: formData.hora,
@@ -124,6 +153,34 @@ const Data = () => {
     }
   };
 
+  const handleTestConnection = async () => {
+    setSyncing(true);
+    try {
+      const isConnected = await syncService.checkConnectivity();
+      if (isConnected) {
+        Alert.alert('✅ Connected', 'Server is reachable');
+      } else {
+        Alert.alert('❌ Connection Failed', 'Server is not reachable. Check the URL in .env');
+      }
+    } catch (error: any) {
+      Alert.alert('❌ Error', error.message);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const handleTestEndpoint = async () => {
+    setSyncing(true);
+    try {
+      await syncService.testEndpoint();
+      Alert.alert('✅ Test Complete', 'Check console logs for details');
+    } catch (error: any) {
+      Alert.alert('❌ Error', error.message);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const handleDeleteRecord = async (recordId: string | undefined) => {
     if (!recordId) return;
     try {
@@ -171,12 +228,30 @@ const Data = () => {
               <Upload size={32} color={colors.mutedForeground} />
             )}
           </View>
-          <Button onPress={handleSync} style={styles.syncButton} disabled={syncing}>
-            <View style={styles.buttonContent}>
-              <Cloud size={16} color={colors.primaryForeground} />
-              <Text style={styles.buttonText}>{syncing ? 'Syncing...' : 'Sync to Warehouse'}</Text>
-            </View>
-          </Button>
+          <View style={styles.buttonRow}>
+            <Button onPress={handleSync} style={{ ...styles.syncButton, ...styles.syncButtonFull } as any} disabled={syncing}>
+              <View style={styles.buttonContent}>
+                <Cloud size={16} color={colors.primaryForeground} />
+                <Text style={styles.buttonText}>{syncing ? 'Syncing...' : 'Sync to Warehouse'}</Text>
+              </View>
+            </Button>
+          </View>
+          <View style={styles.testButtonRow}>
+            <TouchableOpacity 
+              onPress={handleTestConnection} 
+              style={styles.testButton}
+              disabled={syncing}
+            >
+              <Text style={styles.testButtonText}>Test Health 🔌</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              onPress={handleTestEndpoint} 
+              style={styles.testButton}
+              disabled={syncing}
+            >
+              <Text style={styles.testButtonText}>Test /dw/ 📤</Text>
+            </TouchableOpacity>
+          </View>
         </CardContent>
       </Card>
 
@@ -448,6 +523,33 @@ const styles = StyleSheet.create({
   },
   syncButton: {
     marginTop: spacing.md,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  syncButtonFull: {
+    flex: 1,
+  },
+  testButtonRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  testButton: {
+    flex: 1,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 4,
+    backgroundColor: colors.muted,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  testButtonText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.foreground,
   },
   addButtonContainer: {
     marginBottom: spacing.md,

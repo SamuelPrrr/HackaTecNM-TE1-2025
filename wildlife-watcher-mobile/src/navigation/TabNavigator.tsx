@@ -1,10 +1,11 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Home, Radio, Map, Database } from 'lucide-react-native';
+import { Home, Radio, Map, Database, Wifi } from 'lucide-react-native';
 import Dashboard from '../screens/Dashboard';
 import Models from '../screens/Models';
 import MapViewScreen from '../screens/MapView';
 import Data from '../screens/Data';
+import NetworkDiagnostics from '../components/NetworkDiagnostics';
 import { colors } from '../theme/colors';
 
 const Tab = createBottomTabNavigator();
@@ -69,6 +70,14 @@ const TabNavigator = () => {
         component={Data}
         options={{
           tabBarIcon: ({ color, size }) => <Database size={size} color={color} />,
+          headerShown: false,
+        }}
+      />
+      <Tab.Screen
+        name="Network"
+        component={NetworkDiagnostics}
+        options={{
+          tabBarIcon: ({ color, size }) => <Wifi size={size} color={color} />,
           headerShown: false,
         }}
       />

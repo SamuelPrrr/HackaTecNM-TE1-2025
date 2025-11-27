@@ -5,8 +5,8 @@ export type WildlifeRecord = {
   cantidad_especies: number;
   tipo_especies: string;
   fecha: string; // YYYY-MM-DD
-  lat?: number;
-  long?: number;
+  lat: number | null | undefined;
+  long?: number | null | undefined;
   hora: string; // HH:mm:ss
   synced?: boolean; // true if uploaded to server
   createdAt?: number; // timestamp for local tracking

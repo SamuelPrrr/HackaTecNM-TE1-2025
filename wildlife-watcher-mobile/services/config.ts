@@ -1,6 +1,6 @@
 /**
  * Environment Configuration
- * Loads credentials from .env file
+ * Loads credentials from .env file (or hardcoded for Expo which doesn't auto-load .env)
  * NEVER commit .env file to git - it contains sensitive data!
  * 
  * Usage:
@@ -15,8 +15,8 @@ const config = {
   // Backend API Configuration (REST)
   // ============================================
   api: {
-    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
-    endpoint: process.env.REACT_APP_API_ENDPOINT || '/api/wildlife',
+    baseURL: process.env.REACT_APP_API_URL || 'http://3.16.128.82:8000',
+    endpoint: process.env.REACT_APP_API_ENDPOINT || '/dw/',
     timeout: 30000,
   },
 
@@ -57,5 +57,21 @@ if (config.storageMode === 'firebase' && !config.firebase.projectId) {
 if (!config.api.baseURL) {
   console.warn('⚠️  API baseURL not configured in .env');
 }
+
+// Log configuration on load (for debugging)
+console.log('🔧 Config loaded:', {
+  api: {
+    baseURL: config.api.baseURL,
+    endpoint: config.api.endpoint,
+    fullURL: `${config.api.baseURL}${config.api.endpoint}`,
+  },
+  storageMode: config.storageMode,
+  postgres: {
+    host: config.postgres.host,
+    port: config.postgres.port,
+    database: config.postgres.database,
+    user: config.postgres.user,
+  },
+});
 
 export default config;
