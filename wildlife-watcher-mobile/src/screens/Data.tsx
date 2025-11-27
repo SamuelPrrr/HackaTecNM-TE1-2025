@@ -198,7 +198,10 @@ const Data = () => {
   );
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+    >
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Data Warehouse</Text>
@@ -209,11 +212,18 @@ const Data = () => {
       <Card style={styles.syncCard}>
         <CardHeader>
           <View style={styles.syncTitleRow}>
-            <Cloud size={20} color={colors.primary} />
-            <CardTitle style={styles.syncTitle}>Cloud Synchronization</CardTitle>
+            <Cloud
+              size={20}
+              color={colors.primary}
+            />
+            <CardTitle style={styles.syncTitle}>
+              Cloud Synchronization
+            </CardTitle>
           </View>
           <CardDescription>
-            {lastSync ? `Last synced: ${lastSync.toLocaleString()}` : 'No recent synchronization'}
+            {lastSync
+              ? `Last synced: ${lastSync.toLocaleString()}`
+              : "No recent synchronization"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -223,21 +233,36 @@ const Data = () => {
               <Text style={styles.pendingValue}>{stats.unsynced}</Text>
             </View>
             {syncing ? (
-              <ActivityIndicator size="small" color={colors.primary} />
+              <ActivityIndicator
+                size='small'
+                color={colors.primary}
+              />
             ) : (
-              <Upload size={32} color={colors.mutedForeground} />
+              <Upload
+                size={32}
+                color={colors.mutedForeground}
+              />
             )}
           </View>
           <View style={styles.buttonRow}>
-            <Button onPress={handleSync} style={{ ...styles.syncButton, ...styles.syncButtonFull } as any} disabled={syncing}>
+            <Button
+              onPress={handleSync}
+              style={{ ...styles.syncButton, ...styles.syncButtonFull } as any}
+              disabled={syncing}
+            >
               <View style={styles.buttonContent}>
-                <Cloud size={16} color={colors.primaryForeground} />
-                <Text style={styles.buttonText}>{syncing ? 'Syncing...' : 'Sync to Warehouse'}</Text>
+                <Cloud
+                  size={16}
+                  color={colors.primaryForeground}
+                />
+                <Text style={styles.buttonText}>
+                  {syncing ? "Syncing..." : "Sync to Warehouse"}
+                </Text>
               </View>
             </Button>
           </View>
           <View style={styles.testButtonRow}>
-            <TouchableOpacity 
+            {/* <TouchableOpacity 
               onPress={handleTestConnection} 
               style={styles.testButton}
               disabled={syncing}
@@ -250,29 +275,26 @@ const Data = () => {
               disabled={syncing}
             >
               <Text style={styles.testButtonText}>Test /dw/ 📤</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </CardContent>
       </Card>
 
-      {/* Add Record Button */}
-      <View style={styles.addButtonContainer}>
-        <Button onPress={() => setShowForm(true)} style={styles.addButton}>
-          <View style={styles.buttonContent}>
-            <Plus size={16} color={colors.primaryForeground} />
-            <Text style={styles.buttonText}>Add New Record</Text>
-          </View>
-        </Button>
-      </View>
-
       {/* Add Record Form Modal */}
-      <Modal visible={showForm} animationType="slide" transparent>
+      <Modal
+        visible={showForm}
+        animationType='slide'
+        transparent
+      >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>New Wildlife Record</Text>
               <TouchableOpacity onPress={() => setShowForm(false)}>
-                <X size={24} color={colors.foreground} />
+                <X
+                  size={24}
+                  color={colors.foreground}
+                />
               </TouchableOpacity>
             </View>
 
@@ -280,9 +302,11 @@ const Data = () => {
               <View style={styles.formGroup}>
                 <Text style={styles.formLabel}>Species Type *</Text>
                 <Input
-                  placeholder="e.g., Red Fox"
+                  placeholder='e.g., Red Fox'
                   value={formData.tipo_especies}
-                  onChangeText={(text) => setFormData({ ...formData, tipo_especies: text })}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, tipo_especies: text })
+                  }
                   style={styles.formInput}
                 />
               </View>
@@ -290,10 +314,12 @@ const Data = () => {
               <View style={styles.formGroup}>
                 <Text style={styles.formLabel}>Quantity *</Text>
                 <Input
-                  placeholder="0"
+                  placeholder='0'
                   value={formData.cantidad_especies}
-                  onChangeText={(text) => setFormData({ ...formData, cantidad_especies: text })}
-                  keyboardType="numeric"
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, cantidad_especies: text })
+                  }
+                  keyboardType='numeric'
                   style={styles.formInput}
                 />
               </View>
@@ -302,18 +328,22 @@ const Data = () => {
                 <View style={styles.formGroupHalf}>
                   <Text style={styles.formLabel}>Date *</Text>
                   <Input
-                    placeholder="YYYY-MM-DD"
+                    placeholder='YYYY-MM-DD'
                     value={formData.fecha}
-                    onChangeText={(text) => setFormData({ ...formData, fecha: text })}
+                    onChangeText={(text) =>
+                      setFormData({ ...formData, fecha: text })
+                    }
                     style={styles.formInput}
                   />
                 </View>
                 <View style={styles.formGroupHalf}>
                   <Text style={styles.formLabel}>Time *</Text>
                   <Input
-                    placeholder="HH:mm"
+                    placeholder='HH:mm'
                     value={formData.hora}
-                    onChangeText={(text) => setFormData({ ...formData, hora: text })}
+                    onChangeText={(text) =>
+                      setFormData({ ...formData, hora: text })
+                    }
                     style={styles.formInput}
                   />
                 </View>
@@ -323,20 +353,24 @@ const Data = () => {
                 <View style={styles.formGroupHalf}>
                   <Text style={styles.formLabel}>Latitude</Text>
                   <Input
-                    placeholder="0.0000000"
+                    placeholder='0.0000000'
                     value={formData.lat}
-                    onChangeText={(text) => setFormData({ ...formData, lat: text })}
-                    keyboardType="decimal-pad"
+                    onChangeText={(text) =>
+                      setFormData({ ...formData, lat: text })
+                    }
+                    keyboardType='decimal-pad'
                     style={styles.formInput}
                   />
                 </View>
                 <View style={styles.formGroupHalf}>
                   <Text style={styles.formLabel}>Longitude</Text>
                   <Input
-                    placeholder="0.0000000"
+                    placeholder='0.0000000'
                     value={formData.long}
-                    onChangeText={(text) => setFormData({ ...formData, long: text })}
-                    keyboardType="decimal-pad"
+                    onChangeText={(text) =>
+                      setFormData({ ...formData, long: text })
+                    }
+                    keyboardType='decimal-pad'
                     style={styles.formInput}
                   />
                 </View>
@@ -352,7 +386,9 @@ const Data = () => {
                     } as any
                   }
                 >
-                  <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
+                  <Text style={[styles.buttonText, styles.cancelButtonText]}>
+                    Cancel
+                  </Text>
                 </Button>
                 <Button
                   onPress={handleAddRecord}
@@ -379,35 +415,58 @@ const Data = () => {
         <CardContent>
           <View style={styles.searchRow}>
             <View style={styles.searchContainer}>
-              <Search size={16} color={colors.mutedForeground} style={styles.searchIcon} />
+              <Search
+                size={16}
+                color={colors.mutedForeground}
+                style={styles.searchIcon}
+              />
               <Input
-                placeholder="Search records..."
+                placeholder='Search records...'
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 style={styles.searchInput}
               />
             </View>
             <TouchableOpacity style={styles.filterButton}>
-              <Filter size={20} color={colors.foreground} />
+              <Filter
+                size={20}
+                color={colors.foreground}
+              />
             </TouchableOpacity>
           </View>
 
           {loading ? (
-            <ActivityIndicator size="small" color={colors.primary} style={styles.loadingSpinner} />
+            <ActivityIndicator
+              size='small'
+              color={colors.primary}
+              style={styles.loadingSpinner}
+            />
           ) : filteredRecords.length > 0 ? (
             <View style={styles.recordsList}>
               {filteredRecords.map((record) => (
-                <Card key={record.id} style={styles.recordCard}>
+                <Card
+                  key={record.id}
+                  style={styles.recordCard}
+                >
                   <CardContent style={styles.recordContent}>
                     <View style={styles.recordInfo}>
-                      <Text style={styles.recordSpecies}>{record.tipo_especies}</Text>
+                      <Text style={styles.recordSpecies}>
+                        {record.tipo_especies}
+                      </Text>
                       <View style={styles.recordMeta}>
-                        <Calendar size={12} color={colors.mutedForeground} />
-                        <Text style={styles.recordMetaText}>{record.fecha}</Text>
+                        <Calendar
+                          size={12}
+                          color={colors.mutedForeground}
+                        />
+                        <Text style={styles.recordMetaText}>
+                          {record.fecha}
+                        </Text>
                         <Text style={styles.recordMetaText}>•</Text>
                         <Text style={styles.recordMetaText}>{record.hora}</Text>
                       </View>
-                      <Text style={styles.recordQuantity}>Qty: {record.cantidad_especies}</Text>
+                      <Text style={styles.recordQuantity}>
+                        Qty: {record.cantidad_especies}
+                      </Text>
                       {record.lat && record.long && (
                         <Text style={styles.recordLocation}>
                           📍 {record.lat.toFixed(4)}, {record.long.toFixed(4)}
@@ -415,14 +474,17 @@ const Data = () => {
                       )}
                     </View>
                     <View style={styles.recordActions}>
-                      <Badge variant={record.synced ? 'default' : 'outline'}>
-                        {record.synced ? 'Synced' : 'Pending'}
+                      <Badge variant={record.synced ? "default" : "outline"}>
+                        {record.synced ? "Synced" : "Pending"}
                       </Badge>
                       <TouchableOpacity
                         onPress={() => handleDeleteRecord(record.id)}
                         style={styles.deleteButton}
                       >
-                        <X size={16} color={colors.foreground} />
+                        <X
+                          size={16}
+                          color={colors.foreground}
+                        />
                       </TouchableOpacity>
                     </View>
                   </CardContent>
@@ -435,11 +497,30 @@ const Data = () => {
         </CardContent>
       </Card>
 
+      {/* Add Record Button */}
+      <View style={styles.addButtonContainer}>
+        <Button
+          onPress={() => setShowForm(true)}
+          style={styles.addButton}
+        >
+          <View style={styles.buttonContent}>
+            <Plus
+              size={16}
+              color={colors.primaryForeground}
+            />
+            <Text style={styles.buttonText}>Add New Record</Text>
+          </View>
+        </Button>
+      </View>
+
       {/* Storage Info */}
       <Card style={styles.storageCard}>
         <CardHeader>
           <View style={styles.storageTitleRow}>
-            <Database size={20} color={colors.foreground} />
+            <Database
+              size={20}
+              color={colors.foreground}
+            />
             <CardTitle style={styles.storageTitle}>Storage Info</CardTitle>
           </View>
         </CardHeader>
@@ -455,7 +536,9 @@ const Data = () => {
             </View>
             <View style={styles.storageRow}>
               <Text style={styles.storageLabel}>Synced</Text>
-              <Text style={styles.storageValue}>{stats.total - stats.unsynced}</Text>
+              <Text style={styles.storageValue}>
+                {stats.total - stats.unsynced}
+              </Text>
             </View>
           </View>
         </CardContent>

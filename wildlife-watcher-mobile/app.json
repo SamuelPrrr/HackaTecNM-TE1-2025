@@ -24,7 +24,7 @@
           }
         }
       },
-      "bundleIdentifier": "com.anonymous.wildlife-watcher-mobile"
+      "bundleIdentifier": "com.samuelprr.wildlife-watcher-mobile"
     },
     "android": {
       "adaptiveIcon": {
