@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Alert } from 'react-native';
 import { Wifi, WifiOff, Activity, TrendingUp } from 'lucide-react-native';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/Card';
 import { Button } from '../components/Button';
@@ -8,12 +8,47 @@ import { colors, spacing, borderRadius } from '../theme/colors';
 
 const Dashboard = () => {
   const [isConnected, setIsConnected] = useState(false);
+  const [connecting, setConnecting] = useState(false);
 
   const recentDetections = [
     { species: 'Red Fox', time: 'hace 2 min', type: 'Cámara', confidence: '98%' },
     { species: 'Barn Owl', time: 'hace 15 min', type: 'Audio', confidence: '94%' },
     { species: 'European Badger', time: 'hace 1 hora', type: 'Cámara', confidence: '96%' },
   ];
+
+  const handleToggleConnection = async () => {
+    // Si ya está conectado, solo desconectamos localmente
+    if (isConnected) {
+      setIsConnected(false);
+      Alert.alert('Desconectado', 'Se desconectó de la Raspberry Pi');
+      return;
+    }
+
+    try {
+      setConnecting(true);
+      const response = await fetch('http://10.0.2.15:3000/api/health');
+
+      if (!response.ok) {
+        throw new Error(`Estado inesperado: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setIsConnected(true);
+      Alert.alert(
+        'Conexión exitosa',
+        data?.message || 'FastAPI running on Raspberry Pi'
+      );
+    } catch (error: any) {
+      console.error('Error al conectar con Raspberry Pi:', error);
+      Alert.alert(
+        'Error de conexión',
+        'No se pudo conectar con la Raspberry Pi. Verifica que esté encendida y en la misma red.'
+      );
+      setIsConnected(false);
+    } finally {
+      setConnecting(false);
+    }
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
@@ -53,11 +88,16 @@ const Dashboard = () => {
             </View>
           )}
           <Button
-            onPress={() => setIsConnected(!isConnected)}
+            onPress={handleToggleConnection}
             variant={isConnected ? 'outline' : 'default'}
             style={styles.button}
+            disabled={connecting}
           >
-            {isConnected ? 'Desconectar' : 'Conectar al dispositivo'}
+            {connecting
+              ? 'Conectando...'
+              : isConnected
+              ? 'Desconectar'
+              : 'Conectar al dispositivo'}
           </Button>
         </CardContent>
       </Card>
