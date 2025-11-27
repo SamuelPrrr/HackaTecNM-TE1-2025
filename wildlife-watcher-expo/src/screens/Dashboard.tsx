@@ -10,17 +10,17 @@ const Dashboard = () => {
   const [isConnected, setIsConnected] = useState(false);
 
   const recentDetections = [
-    { species: 'Red Fox', time: '2 min ago', type: 'Camera', confidence: '98%' },
-    { species: 'Barn Owl', time: '15 min ago', type: 'Audio', confidence: '94%' },
-    { species: 'European Badger', time: '1 hour ago', type: 'Camera', confidence: '96%' },
+    { species: 'Red Fox', time: 'hace 2 min', type: 'Cámara', confidence: '98%' },
+    { species: 'Barn Owl', time: 'hace 15 min', type: 'Audio', confidence: '94%' },
+    { species: 'European Badger', time: 'hace 1 hora', type: 'Cámara', confidence: '96%' },
   ];
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>EcoMonitor</Text>
-        <Text style={styles.subtitle}>Ecological Data Collection & Analysis</Text>
+        <Text style={styles.title}>EcoEnlace</Text>
+        <Text style={styles.subtitle}>Recolección y análisis de datos ecológicos</Text>
       </View>
 
       {/* Connection Status Card */}
@@ -33,23 +33,23 @@ const Dashboard = () => {
               ) : (
                 <WifiOff size={20} color={colors.mutedForeground} />
               )}
-              <Text style={styles.cardTitleText}>Raspberry Pi Connection</Text>
+              <Text style={styles.cardTitleText}>Conexión con Raspberry Pi</Text>
             </View>
             <Badge variant={isConnected ? 'success' : 'secondary'}>
-              {isConnected ? 'Connected' : 'Disconnected'}
+              {isConnected ? 'Conectado' : 'Desconectado'}
             </Badge>
           </View>
         </CardHeader>
         <CardContent>
           <Text style={styles.description}>
             {isConnected
-              ? 'Receiving data from sensors and cameras in real-time'
-              : 'Connect to your Raspberry Pi via local Wi-Fi or hotspot'}
+              ? 'Recibiendo datos de sensores y cámaras en tiempo real'
+              : 'Conéctate a tu Raspberry Pi por Wi‑Fi local o zona portátil'}
           </Text>
           {isConnected && (
             <View style={styles.activeMonitoring}>
               <Activity size={16} color={colors.primary} />
-              <Text style={styles.activeText}>Active monitoring</Text>
+              <Text style={styles.activeText}>Monitoreo activo</Text>
             </View>
           )}
           <Button
@@ -57,7 +57,7 @@ const Dashboard = () => {
             variant={isConnected ? 'outline' : 'default'}
             style={styles.button}
           >
-            {isConnected ? 'Disconnect' : 'Connect to Device'}
+            {isConnected ? 'Desconectar' : 'Conectar al dispositivo'}
           </Button>
         </CardContent>
       </Card>
@@ -66,33 +66,35 @@ const Dashboard = () => {
       <View style={styles.statsGrid}>
         <Card style={styles.statCard}>
           <CardContent style={styles.statContent}>
-            <Text style={styles.statLabel}>Species Detected</Text>
+            <Text style={styles.statLabel}>Especies detectadas</Text>
             <Text style={[styles.statValue, { color: colors.primary }]}>24</Text>
             <View style={styles.statTrend}>
               <TrendingUp size={12} color={colors.success} />
-              <Text style={styles.trendText}>+3 today</Text>
+              <Text style={styles.trendText}>+3 hoy</Text>
             </View>
           </CardContent>
         </Card>
 
         <Card style={styles.statCard}>
           <CardContent style={styles.statContent}>
-            <Text style={styles.statLabel}>Active Sensors</Text>
+            <Text style={styles.statLabel}>Sensores activos</Text>
             <Text style={[styles.statValue, { color: colors.secondary }]}>8</Text>
             <View style={styles.statTrend}>
               <Activity size={12} color={colors.mutedForeground} />
-              <Text style={[styles.trendText, { color: colors.mutedForeground }]}>
-                All operational
+              <Text style={[styles.trendText, { color: colors.mutedForeground }]}
+              >
+                Todos operando
               </Text>
             </View>
           </CardContent>
         </Card>
+
       </View>
 
       {/* Recent Activity */}
       <Card style={styles.card}>
         <CardHeader>
-          <CardTitle style={styles.sectionTitle}>Recent Detections</CardTitle>
+          <CardTitle style={styles.sectionTitle}>Detecciones recientes</CardTitle>
         </CardHeader>
         <CardContent>
           {recentDetections.map((detection, i) => (

@@ -42,7 +42,7 @@ const TabNavigator = () => {
       }}
     >
       <Tab.Screen
-        name="Home"
+        name="Inicio"
         component={Dashboard}
         options={{
           tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
@@ -50,7 +50,7 @@ const TabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Models"
+        name="Modelos"
         component={Models}
         options={{
           tabBarIcon: ({ color, size }) => <Radio size={size} color={color} />,
@@ -58,7 +58,7 @@ const TabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Map"
+        name="Mapa"
         component={MapViewScreen}
         options={{
           tabBarIcon: ({ color, size }) => <Map size={size} color={color} />,
@@ -66,7 +66,7 @@ const TabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Data"
+        name="Datos"
         component={Data}
         options={{
           tabBarIcon: ({ color, size }) => <Database size={size} color={color} />,
@@ -74,7 +74,7 @@ const TabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Network"
+        name="Red"
         component={NetworkDiagnostics}
         options={{
           tabBarIcon: ({ color, size }) => <Wifi size={size} color={color} />,

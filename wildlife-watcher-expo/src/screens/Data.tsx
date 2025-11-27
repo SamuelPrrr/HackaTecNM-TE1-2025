@@ -71,21 +71,21 @@ const Data = () => {
 
   const handleAddRecord = async () => {
     if (!formData.cantidad_especies || !formData.tipo_especies || !formData.fecha || !formData.hora) {
-      Alert.alert('Validation Error', 'Please fill in all required fields');
+      Alert.alert('Error de validación', 'Por favor llena todos los campos requeridos');
       return;
     }
 
     // Validate numeric fields: cantidad_especies, lat, long
     const cantidad = Number(formData.cantidad_especies);
     if (!Number.isFinite(cantidad) || cantidad <= 0) {
-      Alert.alert('Validation Error', 'Cantidad de especies debe ser un número entero mayor que 0');
+      Alert.alert('Error de validación', 'Cantidad de especies debe ser un número entero mayor que 0');
       return;
     }
 
     if (formData.lat) {
       const latNum = parseFloat(formData.lat);
       if (!Number.isFinite(latNum) || latNum < -90 || latNum > 90) {
-        Alert.alert('Validation Error', 'Latitude must be a number between -90 and 90');
+        Alert.alert('Error de validación', 'La latitud debe ser un número entre -90 y 90');
         return;
       }
     }
@@ -93,7 +93,7 @@ const Data = () => {
     if (formData.long) {
       const longNum = parseFloat(formData.long);
       if (!Number.isFinite(longNum) || longNum < -180 || longNum > 180) {
-        Alert.alert('Validation Error', 'Longitude must be a number between -180 and 180');
+        Alert.alert('Error de validación', 'La longitud debe ser un número entre -180 y 180');
         return;
       }
     }
@@ -109,7 +109,7 @@ const Data = () => {
       };
 
       await localStorageService.saveRecord(newRecord);
-      Alert.alert('Success', 'Record saved locally');
+      Alert.alert('Éxito', 'Registro guardado localmente');
       setFormData({
         cantidad_especies: '',
         tipo_especies: '',
@@ -121,7 +121,7 @@ const Data = () => {
       setShowForm(false);
       loadRecords();
     } catch (error) {
-      Alert.alert('Error', 'Failed to save record');
+      Alert.alert('Error', 'No se pudo guardar el registro');
       console.error('Error saving record:', error);
     }
   };
@@ -131,7 +131,7 @@ const Data = () => {
     try {
       const unsyncedRecords = await localStorageService.getUnsyncedRecords();
       if (unsyncedRecords.length === 0) {
-        Alert.alert('Info', 'No records to sync');
+        Alert.alert('Información', 'No hay registros para sincronizar');
         setSyncing(false);
         return;
       }
@@ -139,14 +139,14 @@ const Data = () => {
       const result = await syncService.uploadRecords(unsyncedRecords);
       if (result.success && result.uploadedIds.length > 0) {
         await localStorageService.markRecordsSynced(result.uploadedIds);
-        Alert.alert('Success', `Synced ${result.uploadedIds.length} records`);
+        Alert.alert('Éxito', `Se sincronizaron ${result.uploadedIds.length} registros`);
         setLastSync(new Date());
         loadRecords();
       } else {
-        Alert.alert('Error', result.errors?.[0] || 'Failed to sync records');
+        Alert.alert('Error', result.errors?.[0] || 'Error al sincronizar los registros');
       }
     } catch (error) {
-      Alert.alert('Error', 'Sync failed');
+      Alert.alert('Error', 'Falló la sincronización');
       console.error('Sync error:', error);
     } finally {
       setSyncing(false);
@@ -158,9 +158,9 @@ const Data = () => {
     try {
       const isConnected = await syncService.checkConnectivity();
       if (isConnected) {
-        Alert.alert('✅ Connected', 'Server is reachable');
+        Alert.alert('✅ Conectado', 'El servidor es accesible');
       } else {
-        Alert.alert('❌ Connection Failed', 'Server is not reachable. Check the URL in .env');
+        Alert.alert('❌ Error de conexión', 'No se puede acceder al servidor. Verifica la URL en el archivo .env');
       }
     } catch (error: any) {
       Alert.alert('❌ Error', error.message);
@@ -173,7 +173,7 @@ const Data = () => {
     setSyncing(true);
     try {
       await syncService.testEndpoint();
-      Alert.alert('✅ Test Complete', 'Check console logs for details');
+      Alert.alert('✅ Prueba completada', 'Revisa los logs de la consola para más detalles');
     } catch (error: any) {
       Alert.alert('❌ Error', error.message);
     } finally {
@@ -187,7 +187,7 @@ const Data = () => {
       await localStorageService.deleteRecord(recordId);
       loadRecords();
     } catch (error) {
-      Alert.alert('Error', 'Failed to delete record');
+      Alert.alert('Error', 'No se pudo eliminar el registro');
     }
   };
 
@@ -204,8 +204,8 @@ const Data = () => {
     >
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Data Warehouse</Text>
-        <Text style={styles.subtitle}>Manage and sync your collected data</Text>
+        <Text style={styles.title}>Almacén de datos</Text>
+        <Text style={styles.subtitle}>Administra y sincroniza tus datos recolectados</Text>
       </View>
 
       {/* Sync Status */}
@@ -217,19 +217,19 @@ const Data = () => {
               color={colors.primary}
             />
             <CardTitle style={styles.syncTitle}>
-              Cloud Synchronization
+              Sincronización en la nube
             </CardTitle>
           </View>
           <CardDescription>
             {lastSync
-              ? `Last synced: ${lastSync.toLocaleString()}`
-              : "No recent synchronization"}
+              ? `Última sincronización: ${lastSync.toLocaleString()}`
+              : 'Sin sincronizaciones recientes'}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <View style={styles.pendingContainer}>
             <View style={styles.pendingInfo}>
-              <Text style={styles.pendingLabel}>Pending Records</Text>
+              <Text style={styles.pendingLabel}>Registros pendientes</Text>
               <Text style={styles.pendingValue}>{stats.unsynced}</Text>
             </View>
             {syncing ? (
@@ -256,7 +256,7 @@ const Data = () => {
                   color={colors.primaryForeground}
                 />
                 <Text style={styles.buttonText}>
-                  {syncing ? "Syncing..." : "Sync to Warehouse"}
+                  {syncing ? 'Sincronizando...' : 'Sincronizar con el almacén'}
                 </Text>
               </View>
             </Button>
@@ -289,7 +289,7 @@ const Data = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>New Wildlife Record</Text>
+              <Text style={styles.modalTitle}>Nuevo registro de vida silvestre</Text>
               <TouchableOpacity onPress={() => setShowForm(false)}>
                 <X
                   size={24}
@@ -300,9 +300,9 @@ const Data = () => {
 
             <ScrollView style={styles.formScroll}>
               <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>Species Type *</Text>
+                <Text style={styles.formLabel}>Tipo de especie *</Text>
                 <Input
-                  placeholder='e.g., Red Fox'
+                  placeholder='ej. Zorro rojo'
                   value={formData.tipo_especies}
                   onChangeText={(text) =>
                     setFormData({ ...formData, tipo_especies: text })
@@ -312,7 +312,7 @@ const Data = () => {
               </View>
 
               <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>Quantity *</Text>
+                <Text style={styles.formLabel}>Cantidad *</Text>
                 <Input
                   placeholder='0'
                   value={formData.cantidad_especies}
@@ -326,9 +326,9 @@ const Data = () => {
 
               <View style={styles.formRow}>
                 <View style={styles.formGroupHalf}>
-                  <Text style={styles.formLabel}>Date *</Text>
+                  <Text style={styles.formLabel}>Fecha *</Text>
                   <Input
-                    placeholder='YYYY-MM-DD'
+                    placeholder='AAAA-MM-DD'
                     value={formData.fecha}
                     onChangeText={(text) =>
                       setFormData({ ...formData, fecha: text })
@@ -337,7 +337,7 @@ const Data = () => {
                   />
                 </View>
                 <View style={styles.formGroupHalf}>
-                  <Text style={styles.formLabel}>Time *</Text>
+                  <Text style={styles.formLabel}>Hora *</Text>
                   <Input
                     placeholder='HH:mm'
                     value={formData.hora}
@@ -351,7 +351,7 @@ const Data = () => {
 
               <View style={styles.formRow}>
                 <View style={styles.formGroupHalf}>
-                  <Text style={styles.formLabel}>Latitude</Text>
+                  <Text style={styles.formLabel}>Latitud</Text>
                   <Input
                     placeholder='0.0000000'
                     value={formData.lat}
@@ -363,7 +363,7 @@ const Data = () => {
                   />
                 </View>
                 <View style={styles.formGroupHalf}>
-                  <Text style={styles.formLabel}>Longitude</Text>
+                  <Text style={styles.formLabel}>Longitud</Text>
                   <Input
                     placeholder='0.0000000'
                     value={formData.long}
@@ -387,7 +387,7 @@ const Data = () => {
                   }
                 >
                   <Text style={[styles.buttonText, styles.cancelButtonText]}>
-                    Cancel
+                    Cancelar
                   </Text>
                 </Button>
                 <Button
@@ -399,7 +399,7 @@ const Data = () => {
                     } as any
                   }
                 >
-                  <Text style={styles.buttonText}>Save Record</Text>
+                  <Text style={styles.buttonText}>Guardar registro</Text>
                 </Button>
               </View>
             </ScrollView>
@@ -410,7 +410,7 @@ const Data = () => {
       {/* Filters and Search */}
       <Card style={styles.card}>
         <CardHeader>
-          <CardTitle style={styles.sectionTitle}>Data Records</CardTitle>
+          <CardTitle style={styles.sectionTitle}>Registros de datos</CardTitle>
         </CardHeader>
         <CardContent>
           <View style={styles.searchRow}>
@@ -421,7 +421,7 @@ const Data = () => {
                 style={styles.searchIcon}
               />
               <Input
-                placeholder='Search records...'
+                placeholder='Buscar registros...'
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 style={styles.searchInput}
@@ -465,7 +465,7 @@ const Data = () => {
                         <Text style={styles.recordMetaText}>{record.hora}</Text>
                       </View>
                       <Text style={styles.recordQuantity}>
-                        Qty: {record.cantidad_especies}
+                        Cant.: {record.cantidad_especies}
                       </Text>
                       {record.lat && record.long && (
                         <Text style={styles.recordLocation}>
@@ -474,8 +474,8 @@ const Data = () => {
                       )}
                     </View>
                     <View style={styles.recordActions}>
-                      <Badge variant={record.synced ? "default" : "outline"}>
-                        {record.synced ? "Synced" : "Pending"}
+                      <Badge variant={record.synced ? 'default' : 'outline'}>
+                        {record.synced ? 'Sincronizado' : 'Pendiente'}
                       </Badge>
                       <TouchableOpacity
                         onPress={() => handleDeleteRecord(record.id)}
@@ -492,7 +492,7 @@ const Data = () => {
               ))}
             </View>
           ) : (
-            <Text style={styles.noRecords}>No records found</Text>
+            <Text style={styles.noRecords}>No se encontraron registros</Text>
           )}
         </CardContent>
       </Card>
@@ -508,7 +508,7 @@ const Data = () => {
               size={16}
               color={colors.primaryForeground}
             />
-            <Text style={styles.buttonText}>Add New Record</Text>
+            <Text style={styles.buttonText}>Agregar nuevo registro</Text>
           </View>
         </Button>
       </View>
@@ -521,21 +521,21 @@ const Data = () => {
               size={20}
               color={colors.foreground}
             />
-            <CardTitle style={styles.storageTitle}>Storage Info</CardTitle>
+            <CardTitle style={styles.storageTitle}>Información de almacenamiento</CardTitle>
           </View>
         </CardHeader>
         <CardContent>
           <View style={styles.storageInfo}>
             <View style={styles.storageRow}>
-              <Text style={styles.storageLabel}>Total Records</Text>
+              <Text style={styles.storageLabel}>Registros totales</Text>
               <Text style={styles.storageValue}>{stats.total}</Text>
             </View>
             <View style={styles.storageRow}>
-              <Text style={styles.storageLabel}>Pending Sync</Text>
+              <Text style={styles.storageLabel}>Pendientes por sincronizar</Text>
               <Text style={styles.storageValue}>{stats.unsynced}</Text>
             </View>
             <View style={styles.storageRow}>
-              <Text style={styles.storageLabel}>Synced</Text>
+              <Text style={styles.storageLabel}>Sincronizados</Text>
               <Text style={styles.storageValue}>
                 {stats.total - stats.unsynced}
               </Text>

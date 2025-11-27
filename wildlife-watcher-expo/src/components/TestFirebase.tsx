@@ -44,7 +44,7 @@ export default function TestFirebase() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Prueba Firebase</Text>
+      <Text style={styles.title}>Prueba de Firebase</Text>
 
       {loading && <ActivityIndicator size="small" color="#333" />}
 
@@ -66,7 +66,7 @@ export default function TestFirebase() {
             )}
           />
 
-          <Text style={styles.rawTitle}>Raw JSON (for debugging):</Text>
+          <Text style={styles.rawTitle}>JSON sin procesar (para depuración):</Text>
           <ScrollView style={styles.rawBox}>
             <Text selectable>{JSON.stringify(raw, null, 2)}</Text>
           </ScrollView>

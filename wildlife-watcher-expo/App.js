@@ -1,18 +1,24 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import TabNavigator from './src/navigation/TabNavigator';
 import TestFirebase from './src/components/TestFirebase';
+import { colors } from './src/theme/colors';
 
 export default function App() {
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <StatusBar style='dark' />
-        <TabNavigator />
-        {/* <TestFirebase></TestFirebase> */}
-      </NavigationContainer>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: colors.background }}
+        edges={['top']}
+      >
+        <NavigationContainer>
+          <StatusBar style="dark" />
+          <TabNavigator />
+          {/* <TestFirebase></TestFirebase> */}
+        </NavigationContainer>
+      </SafeAreaView>
     </SafeAreaProvider>
   );
 }

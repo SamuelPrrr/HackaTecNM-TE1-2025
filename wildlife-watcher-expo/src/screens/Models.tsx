@@ -22,24 +22,24 @@ const Models = () => {
   const models: Model[] = [
     {
       id: 'audio',
-      title: 'Audio Processing',
-      description: 'Recognize animal calls and environmental sounds using acoustic analysis',
+      title: 'Procesamiento de audio',
+      description: 'Reconoce llamadas de animales y sonidos ambientales mediante análisis acústico',
       icon: Mic,
-      features: ['Bird call identification', 'Mammal vocalization', 'Sound level monitoring'],
+      features: ['Identificación de cantos de aves', 'Vocalización de mamíferos', 'Monitoreo de nivel de sonido'],
     },
     {
       id: 'motion',
-      title: 'Motion Detection',
-      description: 'Track movement and activity patterns in the monitored area',
+      title: 'Detección de movimiento',
+      description: 'Rastrea movimiento y patrones de actividad en el área monitoreada',
       icon: Activity,
-      features: ['Real-time alerts', 'Pattern analysis', 'Activity tracking'],
+      features: ['Alertas en tiempo real', 'Análisis de patrones', 'Seguimiento de actividad'],
     },
     {
       id: 'species',
-      title: 'Species Recognition',
-      description: 'Visual identification of flora and fauna through camera feeds',
+      title: 'Reconocimiento de especies',
+      description: 'Identificación visual de flora y fauna a través de cámaras',
       icon: Camera,
-      features: ['Animal classification', 'Plant identification', 'Population counting'],
+      features: ['Clasificación de animales', 'Identificación de plantas', 'Conteo de poblaciones'],
     },
   ];
 
@@ -53,8 +53,8 @@ const Models = () => {
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Processing Models</Text>
-        <Text style={styles.subtitle}>Select the AI model to run on your Raspberry Pi</Text>
+        <Text style={styles.title}>Modelos de procesamiento</Text>
+        <Text style={styles.subtitle}>Selecciona el modelo de IA que se ejecutará en tu Raspberry Pi</Text>
       </View>
 
       {/* Active Model Banner */}
@@ -63,8 +63,8 @@ const Models = () => {
           <CardContent style={styles.activeBannerContent}>
             <CheckCircle2 size={20} color={colors.primary} />
             <View style={styles.activeBannerText}>
-              <Text style={styles.activeBannerTitle}>{activeModelData.title} Active</Text>
-              <Text style={styles.activeBannerSubtitle}>Processing data in real-time</Text>
+              <Text style={styles.activeBannerTitle}>Modelo activo: {activeModelData.title}</Text>
+              <Text style={styles.activeBannerSubtitle}>Procesando datos en tiempo real</Text>
             </View>
           </CardContent>
         </Card>
@@ -96,11 +96,11 @@ const Models = () => {
                     </CardDescription>
                   </View>
                 </View>
-                {isActive && <Badge variant="success">Active</Badge>}
+                {isActive && <Badge variant="success">Activo</Badge>}
               </View>
             </CardHeader>
             <CardContent>
-              <Text style={styles.featuresLabel}>Features:</Text>
+              <Text style={styles.featuresLabel}>Características:</Text>
               <View style={styles.featuresList}>
                 {model.features.map((feature, i) => (
                   <View key={i} style={styles.featureItem}>
@@ -114,7 +114,7 @@ const Models = () => {
                 variant={isActive ? 'outline' : 'default'}
                 style={styles.modelButton}
               >
-                {isActive ? 'Deactivate' : 'Activate Model'}
+                {isActive ? 'Desactivar' : 'Activar modelo'}
               </Button>
             </CardContent>
           </Card>
@@ -125,9 +125,9 @@ const Models = () => {
       <Card style={styles.infoCard}>
         <CardContent style={styles.infoContent}>
           <Text style={styles.infoText}>
-            <Text style={styles.infoTextBold}>Note:</Text> Only one model can be active at a
-            time. Selecting a new model will configure your Raspberry Pi to run that type of
-            analysis.
+            <Text style={styles.infoTextBold}>Nota:</Text> Solo un modelo puede estar activo a la
+            vez. Al seleccionar un nuevo modelo se configurará tu Raspberry Pi para ejecutar ese
+            tipo de análisis.
           </Text>
         </CardContent>
       </Card>

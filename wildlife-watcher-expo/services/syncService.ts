@@ -53,7 +53,7 @@ class SyncService {
       return {
         success: false,
         uploadedIds: [],
-        errors: ['Base URL is not configured'],
+        errors: ['La URL base no está configurada'],
       };
     }
 

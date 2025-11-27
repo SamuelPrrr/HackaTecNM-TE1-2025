@@ -26,8 +26,8 @@ const MapViewScreen = () => {
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Demographic Map</Text>
-        <Text style={styles.subtitle}>Species distribution and detection patterns</Text>
+        <Text style={styles.title}>Mapa demográfico</Text>
+        <Text style={styles.subtitle}>Distribución de especies y patrones de detección</Text>
       </View>
 
       {/* Map Card */}
@@ -35,8 +35,8 @@ const MapViewScreen = () => {
         <CardHeader style={styles.mapHeader}>
           <View style={styles.mapHeaderContent}>
             <View>
-              <CardTitle style={styles.mapTitle}>Live Detection Map</CardTitle>
-              <CardDescription>Real-time location data from all sensors</CardDescription>
+              <CardTitle style={styles.mapTitle}>Mapa de detecciones en vivo</CardTitle>
+              <CardDescription>Datos de ubicación en tiempo real de todos los sensores</CardDescription>
             </View>
           </View>
         </CardHeader>
@@ -59,7 +59,7 @@ const MapViewScreen = () => {
                 }}
                 pinColor={colors.primary}
                 title={detection.species}
-                description={`${detection.count} detections`}
+                description={`${detection.count} detecciones`}
               />
             ))}
           </MapView>
@@ -72,7 +72,7 @@ const MapViewScreen = () => {
           <CardContent style={styles.statContent}>
             <View style={styles.statIconRow}>
               <MapPin size={16} color={colors.primary} />
-              <Text style={styles.statLabel}>Active Locations</Text>
+              <Text style={styles.statLabel}>Ubicaciones activas</Text>
             </View>
             <Text style={styles.statValue}>12</Text>
           </CardContent>
@@ -82,7 +82,7 @@ const MapViewScreen = () => {
           <CardContent style={styles.statContent}>
             <View style={styles.statIconRow}>
               <TrendingUp size={16} color={colors.success} />
-              <Text style={styles.statLabel}>Detections Today</Text>
+              <Text style={styles.statLabel}>Detecciones hoy</Text>
             </View>
             <Text style={styles.statValue}>47</Text>
           </CardContent>
@@ -92,8 +92,8 @@ const MapViewScreen = () => {
       {/* Top Species */}
       <Card style={styles.card}>
         <CardHeader>
-          <CardTitle style={styles.sectionTitle}>Most Detected Species</CardTitle>
-          <CardDescription>By frequency in the monitored area</CardDescription>
+          <CardTitle style={styles.sectionTitle}>Especies más detectadas</CardTitle>
+          <CardDescription>Por frecuencia en el área monitoreada</CardDescription>
         </CardHeader>
         <CardContent>
           {topSpecies.map((species, i) => (
